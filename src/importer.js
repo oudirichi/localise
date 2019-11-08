@@ -1,7 +1,7 @@
 const path = require('path');
 const chalk = require('chalk');
 const FactoryExtension = require('./extensions/factory-extension');
-const { exitFailure } = require('./utils/exit-status');
+const { exitFailure, exitSuccess } = require('./utils/exit-status');
 const { validateKey } = require('./utils/validation');
 const { stringTemplate } = require('./utils/string');
 const {
@@ -69,6 +69,7 @@ module.exports = async function (
     parts[locale] = ExtensionClass.parse(data);
   });
 
+  const createdFolders = {};
   const cleanDirFn = cleanDirOnce();
 
   const saveToFile = (locale) => {
@@ -77,8 +78,9 @@ module.exports = async function (
 
     if (!existsSync(destFolder)) {
       createDir(destFolder);
+      createdFolders[destFolder] = true;
     } else {
-      if (clean) cleanDirFn(destFolder);
+      if (clean && !createdFolders[destFolder]) cleanDirFn(destFolder);
     }
 
     const data = locale ? parts[locale] : parts;
@@ -92,4 +94,6 @@ module.exports = async function (
   } else {
     Object.keys(parts).forEach(saveToFile);
   }
+
+  exitSuccess();
 }

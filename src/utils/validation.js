@@ -1,4 +1,5 @@
 const { exitFailure } = require('./exit-status');
+const chalk = require('chalk');
 
 module.exports = {
   validateKey(key) {

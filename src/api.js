@@ -1,5 +1,7 @@
 const chalk = require('chalk');
 const axios = require('axios');
+const { exitFailure } = require('./utils/exit-status');
+const objectUtils = require('./utils/object');
 
 const baseLocaliseUrl = 'https://localise.biz:443/api';
 
@@ -14,11 +16,13 @@ function apiError(error) {
 }
 
 async function archive(ext, options) {
+  console.log(chalk.green('Fetching archive...'));
+  const cleanOptions = objectUtils.clean(options);
+
   try {
-    console.log(chalk.green('Fetching archive...'));
-    const resp = await axios.get(`${baseLocaliseUrl}/api/export/archive/${ext}.zip`, {
+    const resp = await axios.get(`${baseLocaliseUrl}/export/archive/${ext}.zip`, {
       responseType: 'arraybuffer',
-      params: options
+      params: cleanOptions,
     });
 
     return resp;
@@ -28,10 +32,12 @@ async function archive(ext, options) {
 }
 
 async function assets(ext, options) {
+  console.log(chalk.green('Fetching assets...'));
+  const cleanOptions = objectUtils.clean(options);
+
   try {
-    console.log(chalk.green('Fetching assets...'));
     const resp = await axios.get(`${baseLocaliseUrl}/api/assets.${ext}`, {
-      params: options
+      params: cleanOptions
     });
 
     return resp;

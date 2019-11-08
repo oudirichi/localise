@@ -1,14 +1,16 @@
+#!/usr/bin/env node
+
 const program = require('commander');
 const Localise = require('../src/index');
 
 program
   .name("localise")
-  .version('1.0.0')
-  .option("-k, --key <key>", "localise key, can be provided as env variable LOCALISE_KEY");
+  .version('1.0.0');
 
-program
+  program
   .command('import')
   .description('import translations')
+  .option("-k, --key <key>", "localise key, can be provided as env variable LOCALISE_KEY")
   .option("-d, --dest <dest>", `The dest path for the assets, You have access to "locale" and "ext" as variable. Ex: --dest 'dest/\${locale}.\${ext}'`)
   .option("-c, --clean", 'clean the folder dest')
   .option("-m, --minify", "Minify assets when possible")
@@ -29,6 +31,7 @@ program
   .command('extract')
   .description('extract translations')
   .option("-f, --file <dest>", 'The file to extract assets')
+  .option("-k, --key <key>", "localise key, can be provided as env variable LOCALISE_KEY")
   .action(function (options) {
     Localise.extract(options);
   });
