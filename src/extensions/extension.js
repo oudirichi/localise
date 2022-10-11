@@ -1,11 +1,21 @@
 module.exports = class Extension {
-  constructor() {
-    if (this.constructor === Extension) {
-      throw new TypeError('Extension cannot be instantiated directly');
-    }
+  /**
+   *
+   * @param {string} response
+   * @returns {string}
+   */
+  static parse(response) {
+    return response;
   }
 
-  static parse() {
-    throw new Error('You must implement this function');
+   /**
+   *
+   * @param {Object} param
+   * @param {boolean} param.minify
+   * @param {string} param.data
+   * @returns {boolean}
+   */
+  static formatText({ data } = {}) {
+    return data;
   }
 }

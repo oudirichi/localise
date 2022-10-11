@@ -1,7 +1,8 @@
 const chalk = require('chalk');
 const { exitFailure } = require('../utils/exit-status');
+const Extension = require('./extension');
 
-module.exports = class JsonExtension {
+module.exports = class JsonExtension extends Extension {
   static parse(response) {
     try {
       return JSON.parse(response);

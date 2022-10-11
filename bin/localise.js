@@ -30,8 +30,12 @@ program
 program
   .command('extract')
   .description('extract translations')
+  .option("-e, --ext <ext>", "The extension you want to extract")
   .option("-f, --file <dest>", 'The file to extract assets')
   .option("-k, --key <key>", "localise key, can be provided as env variable LOCALISE_KEY")
+  .option("-a, --async", "Specify that import should be done asynchronously (recommended for large files)")
+  .option("-i, --ignore-existing", "Specify that existing assets encountered in the file will NOT be updated")
+  .option("-t, --tag-new <tagNew>", "Tag any NEW assets added during the import with the given tags (comma separated)")
   .action(function (options) {
     Localise.extract(options);
   });

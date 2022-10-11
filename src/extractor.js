@@ -1,27 +1,63 @@
-const { exitFailure } = require('./utils/exit-status');
 const { validateKey } = require('./utils/validation');
-const FactoryExtension = require('./extensions/factory-extension');
-const LocaliseApi = require('./api');
+const { sleep } = require('./utils/promise');
+const fs = require('fs').promises;
+
+const logger = require('./services/logger');
+const LocaliseApi = require('./localise-api')({ logger });
+
 const {
   filePath,
 } = require('./utils/file');
 
-const fs = require('fs');
-const path = require('path');
-module.exports = async function (
-  {
-    file,
-    key = process.env.LOCALISE_KEY,
-  } = {}
+module.exports = async function ({
+  ignoreExisting = true,
+  async = false,
+  locale='en',
+  key = process.env.LOCALISE_KEY,
+  file,
+  tagNew =null,
+  ext = null,
+ } = {}
 ) {
-  console.error(chalk.red('NOT YET IMPLEMENTED'));
-  exitFailure();
-
+  console.log(key);
   validateKey(key);
-  const extFile = file.substring(file.indexOf('.')+1)
-  const ExtensionClass = FactoryExtension(extFile);
 
-  const data = ExtensionClass.parse(fs.readFileSync(filePath(file), 'utf8'));
-  // const currentAssets = LocaliseApi.assets(extFile);
+  if (!ext) ext = file.split('.').pop();
 
+  const path = filePath(file);
+  const data = await fs.readFile(path, 'utf8');
+
+  const result = await LocaliseApi.push(ext, {
+    'ignore-existing': ignoreExisting,
+    'tag-new': tagNew,
+    async,
+    locale,
+    key,
+  }, data);
+
+  if (result.status === 200) {
+    logger.info(`completed`);
+    console.log(result.data);
+  }
+  else if (result.status === 201) {
+    let completed = false;
+    while(!completed) {
+      try {
+        const progressRes = await LocaliseApi.progress(result.headers.location, { key });
+
+        logger.info(`importation progress... ${progressRes.data.progress}/100`);
+        if (progressRes.data.progress == 100) {
+          logger.info(`completed`);
+          console.log(progressRes.data);
+
+          completed = true;
+        } else {
+          await sleep(1000);
+        }
+      } catch (error) {
+        logger.error(error);
+        completed = true;
+      }
+    }
+  }
 }

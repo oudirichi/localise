@@ -36,6 +36,7 @@ function cleanDirOnce() {
     cacheFolder[destPath] = true;
   };
 }
+
 module.exports = {
   createDir,
   cleanDir,

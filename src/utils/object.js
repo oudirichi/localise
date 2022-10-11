@@ -12,6 +12,11 @@ function clean(objectToClean = {}, { recursive } = {}) {
   return newObject;
 }
 
+function isObject(info) {
+  return typeof info === 'object' && info !== null;
+}
+
 module.exports = {
   clean,
+  isObject,
 }

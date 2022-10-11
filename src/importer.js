@@ -1,5 +1,6 @@
+// @ts-check
+
 const path = require('path');
-const chalk = require('chalk');
 const FactoryExtension = require('./extensions/factory-extension');
 const { exitFailure, exitSuccess } = require('./utils/exit-status');
 const { validateKey } = require('./utils/validation');
@@ -10,30 +11,29 @@ const {
   filePath,
   existsSync,
 } = require('./utils/file');
-const LocaliseApi = require('./api');
 const fs = require('fs');
-
-var AdmZip = require('adm-zip');
+const logger = require('./services/logger');
+const unzip = require('./services/unzip')({ logger });
+const LocaliseApi = require('./localise-api')({ logger });
 
 module.exports = async function (
   {
     bundled = false,
-    clean,
-    dest,
+    clean = false,
+    dest = '',
     ext = 'json',
-    filter,
-    format,
-    index,
+    filter = null,
+    format = null,
+    index = null,
     key = process.env.LOCALISE_KEY,
     minify = false,
-    order,
-    status,
+    order = null,
+    status = null,
   } = {}
 ) {
   validateKey(key);
 
   const ExtensionClass = FactoryExtension(ext);
-
   const response = await LocaliseApi.archive(ext, {
     'no-comments': true,
     ext,
@@ -46,33 +46,23 @@ module.exports = async function (
     v: '',
   });
 
-  let zip, zipEntries;
 
+  let parts;
   try {
-    zip = new AdmZip(response.data);
-    zipEntries = zip.getEntries();
+    logger.debug('unziping...');
+    parts = unzip(response, ExtensionClass);
   } catch (error) {
-    console.error(chalk.red('COULD NOT PARSE RESPONSE TO ZIP. See the following error for report: ', error));
+    logger.error(`COULD NOT PARSE RESPONSE TO ZIP. See the following error for report: ${JSON.stringify(error)}`);
     exitFailure();
+    return;
   }
-
-  const parts = {};
-
-  const getEntryLocale = (entry) => entry.entryName.match(/archive\/locales?\/([a-z]+).*/i)[1];
-
-  zipEntries.forEach((entry) => {
-    if (entry.entryName.match(/readme/i)) return;
-
-    const data = zip.readAsText(entry);
-    const locale = getEntryLocale(entry);
-
-    parts[locale] = ExtensionClass.parse(data);
-  });
-
-  const createdFolders = {};
+  console.log(parts);
+  logger.debug(`unziping done...`);
   const cleanDirFn = cleanDirOnce();
 
   const saveToFile = (locale) => {
+    const createdFolders = {};
+
     const destPath = filePath(stringTemplate(dest, { ext, locale }));
     const destFolder = path.dirname(destPath);
 
@@ -84,9 +74,10 @@ module.exports = async function (
     }
 
     const data = locale ? parts[locale] : parts;
-    process.stdout.write(`Saving: ${destPath}`);
+    logger.info(`Saving: ${destPath}`);
+    // @ts-ignore
     fs.writeFileSync(destPath, ExtensionClass.formatText({ data, minify }));
-    process.stdout.write(chalk.green(' Done\r\n'));
+    logger.info(' Done');
   };
 
   if (bundled) {
