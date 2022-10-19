@@ -24,7 +24,7 @@ program
   .option("--status <status>", 'Export translations with a specific status or flag. Negate values by prefixing with !. e.g. "translated", or "!fuzzy"')
 
   .action(function (options) {
-    Localise.import(options);
+    Localise.import({ ...options, exitStatus: true });
   });
 
 program
@@ -37,7 +37,7 @@ program
   .option("-i, --ignore-existing", "Specify that existing assets encountered in the file will NOT be updated")
   .option("-t, --tag-new <tagNew>", "Tag any NEW assets added during the import with the given tags (comma separated)")
   .action(function (options) {
-    Localise.extract(options);
+    Localise.extract({ ...options, exitStatus: true });
   });
 
 program.parse(process.argv);

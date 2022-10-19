@@ -28,9 +28,9 @@ localise.extract
 # import
 ## usage
 ```
-node index.js import -m --key YOUR_KEY --ext json --dest './tmp/${locale}.${ext}'
+node index.js import -m --key YOUR_KEY --ext json --dest './tmp/{locale}.{ext}'
 
-API_KEY=YOUR_KEY node index.js import -mb --ext json --dest './tmp/bundle.${ext}'
+API_KEY=YOUR_KEY node index.js import -mb --ext json --dest './tmp/bundle.{ext}'
 ```
 
 ## params

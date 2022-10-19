@@ -28,6 +28,8 @@ const saveToFile = ({
 }) => {
   const createdFolders = {};
 
+  logger.debug(`dest: ${dest}`);
+  logger.debug(`locale: ${locale}`);
   const destPath = filePath(stringTemplate(dest, { ext, locale }));
   const destFolder = path.dirname(destPath);
 
@@ -63,9 +65,14 @@ module.exports = async function (
     minify = false,
     order = null,
     status = null,
+    exitStatus = false,
   } = {}
 ) {
-  validateKey(key);
+  if (!validateKey(key)) {
+    if (exitStatus) exitFailure();
+    else return false;
+  };
+
   const ExtensionClass = FactoryExtension(ext);
 
   let parts;
@@ -121,8 +128,9 @@ module.exports = async function (
   if (bundled) {
     saveToFile(saveOpts);
   } else {
-    Object.keys(parts).forEach((locale) => saveToFile({...saveOpts, locale }));
+    Object.keys(parts).forEach((partLocale) => saveToFile({...saveOpts, locale: partLocale }));
   }
 
-  exitSuccess();
+  if (exitStatus) exitSuccess();
+  else return true;
 }

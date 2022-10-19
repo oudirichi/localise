@@ -17,10 +17,13 @@ module.exports = async function ({
   file,
   tagNew =null,
   ext = null,
+  exitStatus = false,
  } = {}
 ) {
-  console.log(key);
-  validateKey(key);
+  if (!validateKey(key)) {
+    if (exitStatus) exitFailure();
+    else return false;
+  };
 
   if (!ext) ext = file.split('.').pop();
 
@@ -68,4 +71,7 @@ module.exports = async function ({
       }
     }
   }
+
+  if (exitStatus) exitSuccess();
+  else return true;
 }
