@@ -37,7 +37,15 @@ module.exports = async function ({
 
   if (result.status === 200) {
     logger.info(`completed`);
-    console.log(result.data);
+
+    /** @type {Object<string, any>} */
+    const msg = result.data;
+    logger.info(JSON.stringify({
+      status: msg.status,
+      message: msg.message,
+      code: msg?.locales?.code,
+      assets: msg.assets,
+    }, null, 2));
   }
   else if (result.status === 201) {
     let completed = false;

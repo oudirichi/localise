@@ -16,6 +16,40 @@ const logger = require('./services/logger');
 const unzip = require('./services/unzip')({ logger });
 const LocaliseApi = require('./localise-api')({ logger });
 
+const saveToFile = ({
+  clean,
+  dest,
+  locale,
+  ext,
+  parts,
+  cleanDirFn,
+  ExtensionClass,
+  minify,
+}) => {
+  const createdFolders = {};
+
+  const destPath = filePath(stringTemplate(dest, { ext, locale }));
+  const destFolder = path.dirname(destPath);
+
+  logger.debug(destPath);
+  logger.debug(destFolder);
+
+  if (!existsSync(destFolder)) {
+    logger.debug(`folder does not exist... creating...`);
+    createDir(destFolder);
+    createdFolders[destFolder] = true;
+  } else if (clean && !createdFolders[destFolder]) {
+    logger.debug(`cleaning folder...`);
+    cleanDirFn(destFolder);
+  }
+
+  const data = locale ? parts[locale] : parts;
+  logger.info(`Saving: ${destPath}`);
+
+  fs.writeFileSync(destPath, ExtensionClass.formatText({ data, minify }));
+  logger.info(' Done');
+};
+
 module.exports = async function (
   {
     bundled = false,
@@ -32,58 +66,62 @@ module.exports = async function (
   } = {}
 ) {
   validateKey(key);
-
   const ExtensionClass = FactoryExtension(ext);
-  const response = await LocaliseApi.archive(ext, {
-    'no-comments': true,
-    ext,
-    filter,
-    format,
-    index,
-    key,
-    order,
-    status,
-    v: '',
-  });
-
 
   let parts;
-  try {
-    logger.debug('unziping...');
-    parts = unzip(response, ExtensionClass);
-  } catch (error) {
-    logger.error(`COULD NOT PARSE RESPONSE TO ZIP. See the following error for report: ${JSON.stringify(error)}`);
-    exitFailure();
-    return;
+  if (bundled) {
+    parts = await LocaliseApi.exportAll(ext, {
+      'no-comments': true,
+      ext,
+      filter,
+      format,
+      index,
+      key,
+      order,
+      status,
+    });
+  } else {
+    const response = await LocaliseApi.archive(ext, {
+      'no-comments': true,
+      ext,
+      filter,
+      format,
+      index,
+      key,
+      order,
+      status,
+    });
+
+
+    try {
+      logger.debug('unziping...');
+      parts = unzip(response, ExtensionClass);
+      logger.debug(`unziping done...`);
+    } catch (error) {
+      logger.error(`COULD NOT PARSE RESPONSE TO ZIP. See the following error for report: ${JSON.stringify(error)}`);
+      exitFailure();
+      return;
+    }
   }
-  console.log(parts);
-  logger.debug(`unziping done...`);
+
+  logger.debug(parts);
   const cleanDirFn = cleanDirOnce();
 
-  const saveToFile = (locale) => {
-    const createdFolders = {};
-
-    const destPath = filePath(stringTemplate(dest, { ext, locale }));
-    const destFolder = path.dirname(destPath);
-
-    if (!existsSync(destFolder)) {
-      createDir(destFolder);
-      createdFolders[destFolder] = true;
-    } else {
-      if (clean && !createdFolders[destFolder]) cleanDirFn(destFolder);
-    }
-
-    const data = locale ? parts[locale] : parts;
-    logger.info(`Saving: ${destPath}`);
-    // @ts-ignore
-    fs.writeFileSync(destPath, ExtensionClass.formatText({ data, minify }));
-    logger.info(' Done');
+  const saveOpts = {
+    clean,
+    dest,
+    locale: '',
+    ext,
+    parts,
+    cleanDirFn,
+    ExtensionClass,
+    minify,
   };
 
   if (bundled) {
-    saveToFile();
+    saveToFile(saveOpts);
   } else {
-    Object.keys(parts).forEach(saveToFile);
+    Object.keys(parts).forEach((locale) => saveToFile({...saveOpts, locale }));
   }
 
   exitSuccess();

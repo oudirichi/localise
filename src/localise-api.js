@@ -9,6 +9,7 @@ function LocaliseApi({ logger }) {
     archive,
     assets,
     push,
+    exportAll,
     progress,
   };
 
@@ -40,6 +41,30 @@ function LocaliseApi({ logger }) {
       const resp = await axios.get(`${baseLocaliseUrl}/export/archive/${ext}.zip`, {
         responseType: 'arraybuffer',
         params: cleanOptions,
+      });
+
+      return resp.data;
+    } catch (error) {
+      apiError(error);
+    }
+  }
+
+  /**
+   *
+   * @param {string} ext
+   * @param {Object.<string, any>} options
+   * @returns {Promise<String|Object>}
+   */
+  async function exportAll(ext, options) {
+    logger.info('Fetching assets...');
+    const url = `${baseLocaliseUrl}/export/all.${ext}`;
+    const cleanOptions = objectUtils.clean(options);
+    logger.debug(url);
+    logger.debug(cleanOptions);
+
+    try {
+      const resp = await axios.get(url, {
+        params: cleanOptions
       });
 
       return resp.data;
@@ -97,8 +122,3 @@ function LocaliseApi({ logger }) {
 }
 
 module.exports = LocaliseApi;
-
-// module.exports = {
-//   archive,
-//   assets,
-// }
