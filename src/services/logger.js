@@ -17,37 +17,25 @@ const consoleFormat = winston.format.printf(({ level, message, timestamp }) => {
     message = formatter[levelLower](message);
   }
 
-  if (process.env.NODE_ENV === 'production') {
-    return `[${timestamp}] ${message}`;
-  } else {
+  if (process.env.NODE_ENV === 'development') {
     return `[${timestamp}] [${level}]: ${message}`;
+  } else {
+    return `[${timestamp}] ${message}`;
   }
 });
 
 const logger = winston.createLogger({
-  // level: 'info',
-  level: process.env.NODE_ENV === 'production' ? 'info': 'debug',
+  level: process.env.NODE_ENV === 'development' ? 'debug': 'info',
   format: winston.format.combine(
     winston.format.timestamp(),
     winston.format.splat(),
     winston.format.json(),
     consoleFormat
   ),
-  // format: winston.format.json(),
-
   transports: [],
 });
 
+logger.add(new winston.transports.Console({}));
 
-logger.add(new winston.transports.Console({
-  // format: winston.format.simple(),
-  // level: process.env.NODE_ENV === 'production' ? 'info': 'debug'
-}));
-
-// if (process.env.NODE_ENV !== 'production') {
-//   logger.add(new winston.transports.Console({
-//     level: 'debug'
-//   }));
-// }
 
 module.exports = logger;

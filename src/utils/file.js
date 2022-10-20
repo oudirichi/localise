@@ -1,6 +1,5 @@
 const path = require('path');
 const fs = require('fs');
-const chalk = require('chalk');
 
 function emptyDir(directoryPath) {
   const files = fs.readdirSync(directoryPath);
@@ -17,12 +16,10 @@ function filePath(filePathToTransforme) {
 }
 
 function createDir(destFolder) {
-  console.log(chalk.green(`Creating folder: ${destFolder}`));
   fs.mkdirSync(destFolder, { recursive: true });
 }
 
 function cleanDir(destFolder) {
-  console.log(chalk.green(`cleaning folder: ${destFolder}`));
   return emptyDir(destFolder);
 }
 

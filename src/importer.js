@@ -37,7 +37,7 @@ const saveToFile = ({
   logger.debug(destFolder);
 
   if (!existsSync(destFolder)) {
-    logger.debug(`folder does not exist... creating...`);
+    logger.debug(`folder does not exist... creating ${destFolder}...`);
     createDir(destFolder);
     createdFolders[destFolder] = true;
   } else if (clean && !createdFolders[destFolder]) {
