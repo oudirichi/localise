@@ -1,0 +1,1 @@
+{"version":3,"file":"factory-extension.js","sourceRoot":"","sources":["../../../src/extensions/factory-extension.ts"],"names":[],"mappings":";;;;;AAAA,4DAAoC;AACpC,sEAA6C;AAE7C,mBAAwB,GAAW;IACjC,MAAM,MAAM,GAAiC;QAC3C,MAAM,EAAE,wBAAa;KACtB,CAAC;IAEF,IAAI,GAAG,IAAI,MAAM;QAAE,OAAO,MAAM,CAAC,GAAG,CAAC,CAAC;IACtC,OAAO,mBAAS,CAAC;AACnB,CAAC;AAPD,4BAOC"}

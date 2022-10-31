@@ -2,10 +2,11 @@
 
 const program = require('commander');
 const Localise = require('../src/index');
+import { version, name } from "./package.json";
 
 program
-  .name("localise")
-  .version('1.0.0');
+  .name(name)
+  .version(version);
 
   program
   .command('import')
@@ -13,7 +14,6 @@ program
   .option("-k, --key <key>", "localise key, can be provided as env variable LOCALISE_KEY")
   .option("-d, --dest <dest>", `The dest path for the assets, You have access to "locale" and "ext" as variable. Ex: --dest 'dest/\${locale}.\${ext}'`)
   .option("-c, --clean", 'clean the folder dest')
-  .option("-m, --minify", "Minify assets when possible")
   .option("-e, --ext <ext>", "The extension you want to fetch. Supported: yaml, json")
   .option("-b, --bundled", "Bundle all assets together when possible")
   .option("-i, --index <index>", 'Override default lookup key for the file format: "id", "text" or a custom alias')
